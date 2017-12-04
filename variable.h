@@ -74,5 +74,7 @@ variable get(char* symbol,struct symboltable* table);
 void allclear(struct symboltable* table);
 void initsymboltable();
 void initifunc();
+
+int repl(FILE* fpin,FILE* fpout);
 #define _VARIABLE_H 1
 #endif
