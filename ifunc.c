@@ -60,13 +60,13 @@ variable quit(variable args){
 variable atom(variable args){
 	if(args.type==TYPE_CONS){
 		if(((cons*)args.var)->car.type==TYPE_CONS){
-			return newvariable(TYPE_NULL);
+			return newvariable(TYPE_NULL,0);
 		}else{
-			return newvariable(TYPE_T);
+			return newvariable(TYPE_T,0);
 		}
 	}else{
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 }
 
@@ -74,29 +74,29 @@ variable eq(variable args){
 	variable A,B;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->cdr.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	A=((cons*)args.var)->car;
 	B=((cons*)(((cons*)args.var)->cdr.var))->car;
 	if(eqvariable(A,B)){
-		return newvariable(TYPE_T);
+		return newvariable(TYPE_T,0);
 	}else{
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 }
 
 variable car(variable args){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->car.type!=TYPE_CONS){
 		ERROR("引数がTYPE_CONSではありません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	return copyvariable(((cons*)((cons*)args.var)->car.var)->car);
 }
@@ -104,11 +104,11 @@ variable car(variable args){
 variable cdr(variable args){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->car.type!=TYPE_CONS){
 		ERROR("引数がTYPE_CONSではありません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	return copyvariable(((cons*)((cons*)args.var)->car.var)->cdr);
 }
@@ -117,11 +117,11 @@ variable _cons(variable args){
 	variable A,B;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->cdr.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	A=((cons*)args.var)->car;
 	B=((cons*)(((cons*)args.var)->cdr.var))->car;
@@ -131,7 +131,7 @@ variable _cons(variable args){
 variable quote(variable args){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}else{
 		return copyvariable( ((cons*)args.var)->car );
 	}
@@ -141,11 +141,11 @@ variable define(variable args){
 	variable A,B,C;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->cdr.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	A=((cons*)args.var)->car;
 	B=((cons*)(((cons*)args.var)->cdr.var))->car;
@@ -159,11 +159,11 @@ variable _if(variable args){
 
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->cdr.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	
 	A=((cons*)args.var)->car;
@@ -172,7 +172,7 @@ variable _if(variable args){
 	if( ((cons*)(((cons*)args.var)->cdr.var))->cdr.type==TYPE_CONS ){
 		C=((cons*)(((cons*)(((cons*)args.var)->cdr.var))->cdr.var))->car;
 	}else{
-		C=newvariable(TYPE_NULL);
+		C=newvariable(TYPE_NULL,0);
 	}
 
 	if( eval(A).type == TYPE_NULL){
@@ -187,18 +187,18 @@ variable _lambda(variable args){
 	variable R;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->cdr.type==TYPE_NULL){
 		ERROR("引数が足りません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	if(((cons*)args.var)->car.type!=TYPE_CONS){
 		ERROR("引数がTYPE_CONSではありません");
-		return newvariable(TYPE_NULL);
+		return newvariable(TYPE_NULL,0);
 	}
 	A=((cons*)args.var)->car;
-	R=newvariable(TYPE_LAMBDA);
+	R=newvariable(TYPE_LAMBDA,0);
 	((lambda*)R.var)->args=A;
 	((lambda*)R.var)->body=((cons*)args.var)->cdr;
 	return R;

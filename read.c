@@ -39,6 +39,29 @@ variable readnum(char* str){
 	return (variable){TYPE_NUM,i};
 }
 
+variable readstr(char* str){
+	char* ptr;
+	charlist* s;
+	variable v;
+	char term=*str;
+
+	s=mkchar(0);
+	for(ptr=str+1;*ptr!=term;ptr++){
+		if(*ptr==term){
+			ptr++;
+			insertlast(s,*ptr);
+		}else if(*ptr=='\0'){
+			ERROR("文字列の途中で入力が終了しました。");
+		}else{
+			insertlast(s,*ptr);
+		}
+	}
+	v=newvariable(TYPE_STR,charlistlength(s));
+	charlisttostr(s,((string*)v.var)->str,((string*)v.var)->size);
+	delcharlist(s);
+	return v;
+}
+
 variable readcons(char* str){
 	char* ptr;
 	int braces=0;
@@ -114,6 +137,30 @@ variable readcons(char* str){
 					}
 					while(*ptr!=' ' && *ptr!=')' && *ptr!='(' && *ptr!='.' )ptr++;
 					ptr--;
+				}else if(*ptr=='\"'){
+					if(refcar){
+						if(excar){
+							h->cdr=(variable){TYPE_CONS,mkcons()};
+							excdr=1;
+							h=h->cdr.var;
+							excar=0;
+							excdr=0;
+							h->car=readstr(ptr);
+							excar=1;
+						}else{
+							h->car=readstr(ptr);
+							excar=1;
+						}
+					}else{
+						if(excdr){
+							ERROR("CDRはすでに代入済みです。");
+						}else{
+							h->cdr=readstr(ptr);
+							excdr=1;
+						}
+					}
+					ptr++;
+					while(*ptr!='\"')ptr++;
 				}else if(*ptr!=' '){
 					if(refcar){
 						if(excar){
@@ -154,6 +201,8 @@ variable read(char* str){
 		return readcons(ptr);
 	}else if('0'<=*ptr && *ptr<='9'){
 		return readnum(ptr);
+	}else if(*ptr=='\"'){
+		return readstr(ptr);
 	}else if(*ptr=='\0'){
 		return (variable){TYPE_NULL,0};
 	}else{

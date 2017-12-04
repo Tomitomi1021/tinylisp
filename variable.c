@@ -7,7 +7,7 @@
 
 cons* mkcons(){
 	variable c;
-	c=newvariable(TYPE_CONS);
+	c=newvariable(TYPE_CONS,0);
 	return (cons*)c.var;
 }
 
@@ -36,6 +36,8 @@ int eqvariable(variable A,variable B){
 				return 1;
 			case TYPE_NULL:
 				return 1;
+			case TYPE_STR:
+				return 0;
 			default:
 				ERROR("定義されていない比較が行われました。");
 				return 0;
@@ -47,32 +49,45 @@ int eqvariable(variable A,variable B){
 variable copyvariable(variable v){
 	variable r;
 
-	r=newvariable(v.type);
+	r=newvariable(TYPE_NULL,0);
 	switch(v.type){
 	case TYPE_CONS:
+		r=newvariable(TYPE_CONS,0);
 		((cons*)r.var)->car=copyvariable(((cons*)v.var)->car);
 		((cons*)r.var)->cdr=copyvariable(((cons*)v.var)->cdr);
 		break;
 	case TYPE_SYM:
+		r=newvariable(TYPE_SYM,0);
 		strcpy(r.var,v.var);
 		break;
 	case TYPE_NUM:
+		r=newvariable(TYPE_NUM,0);
 		*((double*)r.var)=*((double*)v.var);
 		break;
 	case TYPE_IFUNC:
+		r=newvariable(TYPE_IFUNC,0);
 		((ifunc*)r.var)->func=((ifunc*)v.var)->func;
 		((ifunc*)r.var)->type=((ifunc*)v.var)->type;
 		break;
 	case TYPE_T:
+		r=newvariable(TYPE_T,0);
+		break;
 	case TYPE_NULL:
+		r=newvariable(TYPE_NULL,0);
 		break;
 	case TYPE_SPFORM:
+		r=newvariable(TYPE_SPFORM,0);
 		((ifunc*)r.var)->func=((ifunc*)v.var)->func;
 		((ifunc*)r.var)->type=((ifunc*)v.var)->type;
 		break;
 	case TYPE_LAMBDA:
+		r=newvariable(TYPE_LAMBDA,0);
 		((lambda*)r.var)->body = copyvariable(((lambda*)v.var)->body);
 		((lambda*)r.var)->args = copyvariable(((lambda*)v.var)->args);
+		break;
+	case TYPE_STR:
+		r=newvariable(TYPE_STR,((string*)v.var)->size);
+		strncpy(((string*)r.var)->str,((string*)v.var)->str,((string*)r.var)->size);
 		break;
 	default:
 		ERROR("定義されていないタイプのデータをコピーしようとしました。");
@@ -94,6 +109,10 @@ void delvariable(variable v){
 		delvariable(((lambda*)v.var)->body);
 		free(v.var);
 		break;
+	case TYPE_STR:
+		free(((string*)v.var)->str);
+		free(v.var);
+		break;
 	case TYPE_IFUNC:
 	case TYPE_SPFORM:
 	case TYPE_NULL:
@@ -109,7 +128,7 @@ void delvariable(variable v){
 	}
 }
 
-variable newvariable(int type){
+variable newvariable(int type,int option){
 	variable v;
 
 	v.type=type;
@@ -120,8 +139,8 @@ variable newvariable(int type){
 	case TYPE_CONS:
 		v.var=malloc(sizeof(cons));
 		if(v.var==0)PANIC("メモリーの確保に失敗しました。");
-		((cons*)v.var)->car=newvariable(TYPE_NULL);
-		((cons*)v.var)->cdr=newvariable(TYPE_NULL);
+		((cons*)v.var)->car=newvariable(TYPE_NULL,0);
+		((cons*)v.var)->cdr=newvariable(TYPE_NULL,0);
 		break;
 	case TYPE_SYM:
 		v.var=malloc(sizeof(char)*SYMBOLSIZE);
@@ -135,8 +154,8 @@ variable newvariable(int type){
 	case TYPE_LAMBDA:
 		v.var=malloc(sizeof(lambda));
 		if(v.var==0)PANIC("メモリーの確保に失敗しました。");
-		((lambda*)v.var)->args=newvariable(TYPE_NULL);
-		((lambda*)v.var)->body=newvariable(TYPE_NULL);
+		((lambda*)v.var)->args=newvariable(TYPE_NULL,0);
+		((lambda*)v.var)->body=newvariable(TYPE_NULL,0);
 		((lambda*)v.var)->type=TYPE_NULL;
 		break;
 	case TYPE_IFUNC:
@@ -152,6 +171,16 @@ variable newvariable(int type){
 		if(v.var==0)PANIC("メモリーの確保に失敗しました。");
 		((ifunc*)v.var)->type=TYPE_NULL;
 		break;
+	case TYPE_STR:
+		v.var=malloc(sizeof(string));
+		((string*)v.var)->str=(char*)malloc(sizeof(char)*option);
+		if(v.var==0)PANIC("メモリーの確保に失敗しました。");
+		if(((string*)v.var)->str==0)PANIC("メモリーの確保に失敗しました。");
+		((string*)v.var)->size=sizeof(char)*option;
+		if(option>0){
+			((string*)v.var)->str[0]=0;
+		}
+		break;
 	default:
 		ERROR("定義されていないタイプのデータを生成しようとしました。");
 		fprintf(stderr,"タイプ:%d\n",type);
@@ -159,9 +188,10 @@ variable newvariable(int type){
 	return v;
 }
 
+
 variable newcons(variable car,variable cdr){
 	variable v;
-	v=newvariable(TYPE_CONS);
+	v=newvariable(TYPE_CONS,0);
 	((cons*)v.var)->car=copyvariable(car);
 	((cons*)v.var)->cdr=copyvariable(cdr);
 	return v;
@@ -169,7 +199,7 @@ variable newcons(variable car,variable cdr){
 
 variable newifunc(int type,variable (*func)(variable)){
 	variable v;
-	v=newvariable(TYPE_IFUNC);
+	v=newvariable(TYPE_IFUNC,0);
 	((ifunc*)v.var)->type=type;
 	((ifunc*)v.var)->func=func;
 	return v;
@@ -177,7 +207,7 @@ variable newifunc(int type,variable (*func)(variable)){
 
 variable newspform(int type,variable (*func)(variable)){
 	variable v;
-	v=newvariable(TYPE_SPFORM);
+	v=newvariable(TYPE_SPFORM,0);
 	((ifunc*)v.var)->type=type;
 	((ifunc*)v.var)->func=func;
 	return v;
@@ -185,7 +215,7 @@ variable newspform(int type,variable (*func)(variable)){
 
 variable newnum(double i){
 	variable v;
-	v=newvariable(TYPE_NUM);
+	v=newvariable(TYPE_NUM,0);
 	*((double*)v.var)=i;
 	return v;
 }

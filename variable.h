@@ -6,9 +6,10 @@
 #define TYPE_CONS	2
 #define TYPE_SYM	3
 #define TYPE_NUM	4
-#define TYPE_LAMBDA	5
-#define TYPE_IFUNC	6
-#define TYPE_SPFORM	7
+#define TYPE_STR	5
+#define TYPE_LAMBDA	6
+#define TYPE_IFUNC	7
+#define TYPE_SPFORM	8
 
 #define SYMBOLSIZE 32
 #define SYMBOLTABLESIZE 256
@@ -23,6 +24,11 @@ typedef struct{
 	variable car;
 	variable cdr;
 } cons;
+
+typedef struct{
+	int size;
+	char* str;
+} string;
 
 typedef struct{
 	int type;
@@ -46,7 +52,7 @@ extern struct symboltable runtimesymbols[SYMBOLTABLESIZE];
 
 cons* mkcons();
 
-variable newvariable(int type);
+variable newvariable(int type,int option);
 variable newcons(variable car,variable cdr);
 //variable newsym(char* name);
 variable newnum(double i);

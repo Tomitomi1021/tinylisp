@@ -55,6 +55,9 @@ void print(variable var,FILE* fp){
 			ERROR("lambda構造体のbodyの値が不正です。");
 		}
 		break;
+	case TYPE_STR:
+		fprintf(fp,"\"%s\"",((string*)var.var)->str);
+		break;
 	default:
 		ERROR("定義されていないタイプのデータを表示しようとしました。");
 		fprintf(stderr,"タイプ:%d\n",var.type);

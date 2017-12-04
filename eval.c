@@ -71,12 +71,12 @@ variable eval(variable c){
 	variable r,res;
 
 	if(c.type==TYPE_CONS){
-		r=newvariable(TYPE_CONS);
+		r=newvariable(TYPE_CONS,0);
 		whead=r;
 		((cons*)r.var)->car=eval(((cons*)c.var)->car);
 		if( ((cons*)r.var)->car.type == TYPE_IFUNC || ((cons*)r.var)->car.type == TYPE_LAMBDA){
 			for(rhead=((cons*)c.var)->cdr;rhead.type==TYPE_CONS;rhead=((cons*)rhead.var)->cdr){
-				((cons*)whead.var)->cdr=newvariable(TYPE_CONS);
+				((cons*)whead.var)->cdr=newvariable(TYPE_CONS,0);
 				whead=((cons*)whead.var)->cdr;
 				((cons*)whead.var)->car=eval(((cons*)rhead.var)->car);
 			}
