@@ -41,7 +41,7 @@ int repl(FILE* fpin,FILE* fpout){
 				delcharlist(str);
 				str=mkchar(0);
 				v=read(s);
-				v2=eval(v);
+				v2=eval(v,&symbols);
 				if(fpout)print(v2,fpout);
 				if(fpout)fputc('\n',fpout);
 				if(fpout)fprintf(fpout,">>");
@@ -91,6 +91,8 @@ void strtest(){
 
 
 int main(){
+	FILE* fp;
+
 	initsymboltable();
 	initifunc();
 	printf("Welcome to TINY LISP\n");

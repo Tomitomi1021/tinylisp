@@ -15,8 +15,8 @@ double varnum(variable v){
 	if(v.type==TYPE_NUM){
 		return *((double*)v.var);
 	}else{
-		ERROR("引数としてTYPE_NUMでないデータが渡されました。");
 		fprintf(stderr,"タイプ:%d\n",v.type);
+		ERROR("引数としてTYPE_NUMでないデータが渡されました。");
 		return 0;
 	}
 }
@@ -197,7 +197,7 @@ variable newcons(variable car,variable cdr){
 	return v;
 }
 
-variable newifunc(int type,variable (*func)(variable)){
+variable newifunc(int type,variable (*func)(variable,struct symbolstack*)){
 	variable v;
 	v=newvariable(TYPE_IFUNC,0);
 	((ifunc*)v.var)->type=type;
@@ -205,7 +205,7 @@ variable newifunc(int type,variable (*func)(variable)){
 	return v;
 }
 
-variable newspform(int type,variable (*func)(variable)){
+variable newspform(int type,variable (*func)(variable,struct symbolstack*)){
 	variable v;
 	v=newvariable(TYPE_SPFORM,0);
 	((ifunc*)v.var)->type=type;

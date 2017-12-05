@@ -18,6 +18,9 @@ symbol.o:symbol.c
 ifunc.o:ifunc.c
 error.o:error.c
 
+rebuild:
+	make clean
+	make
 
 clean:
 	rm -f *.o *.out

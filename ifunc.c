@@ -40,24 +40,24 @@ double divs(variable args){
 	}
 }
 
-variable _plus(variable args){
+variable _plus(variable args,struct symbolstack* st){
 	return newnum(plus(args));
 }
-variable _minus(variable args){
+variable _minus(variable args,struct symbolstack* st){
 	return newnum(minus(args));
 }
-variable _multi(variable args){
+variable _multi(variable args,struct symbolstack* st){
 	return newnum(multi(args));
 }
-variable _divs(variable args){
+variable _divs(variable args,struct symbolstack* st){
 	return newnum(divs(args));
 }
 
-variable quit(variable args){
+variable quit(variable args,struct symbolstack* st){
 	exit(0);
 }
 
-variable atom(variable args){
+variable atom(variable args,struct symbolstack* st){
 	if(args.type==TYPE_CONS){
 		if(((cons*)args.var)->car.type==TYPE_CONS){
 			return newvariable(TYPE_NULL,0);
@@ -70,7 +70,7 @@ variable atom(variable args){
 	}
 }
 
-variable eq(variable args){
+variable eq(variable args,struct symbolstack* st){
 	variable A,B;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
@@ -89,7 +89,7 @@ variable eq(variable args){
 	}
 }
 
-variable car(variable args){
+variable car(variable args,struct symbolstack* st){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
 		return newvariable(TYPE_NULL,0);
@@ -101,7 +101,7 @@ variable car(variable args){
 	return copyvariable(((cons*)((cons*)args.var)->car.var)->car);
 }
 
-variable cdr(variable args){
+variable cdr(variable args,struct symbolstack* st){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
 		return newvariable(TYPE_NULL,0);
@@ -113,7 +113,7 @@ variable cdr(variable args){
 	return copyvariable(((cons*)((cons*)args.var)->car.var)->cdr);
 }
 
-variable _cons(variable args){
+variable _cons(variable args,struct symbolstack* st){
 	variable A,B;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
@@ -128,7 +128,7 @@ variable _cons(variable args){
 	return newcons(A,B);
 }
 
-variable quote(variable args){
+variable quote(variable args,struct symbolstack* st){
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
 		return newvariable(TYPE_NULL,0);
@@ -137,7 +137,7 @@ variable quote(variable args){
 	}
 }
 
-variable define(variable args){
+variable define(variable args,struct symbolstack* st){
 	variable A,B,C;
 	if(args.type==TYPE_NULL){
 		ERROR("引数が足りません");
@@ -149,12 +149,12 @@ variable define(variable args){
 	}
 	A=((cons*)args.var)->car;
 	B=((cons*)(((cons*)args.var)->cdr.var))->car;
-	C=eval(B);
-	set((char*)A.var,C,symbols);
+	C=eval(B,st);
+	sset((char*)A.var,C,st);
 	return C;
 }
 
-variable _if(variable args){
+variable _if(variable args,struct symbolstack* st){
 	variable A,B,C;
 
 	if(args.type==TYPE_NULL){
@@ -175,14 +175,14 @@ variable _if(variable args){
 		C=newvariable(TYPE_NULL,0);
 	}
 
-	if( eval(A).type == TYPE_NULL){
-		return eval(C);
+	if( eval(A,st).type == TYPE_NULL){
+		return eval(C,st);
 	}else{
-		return eval(B);
+		return eval(B,st);
 	}
 }
 
-variable _lambda(variable args){
+variable _lambda(variable args,struct symbolstack* st){
 	variable A,B;
 	variable R;
 	if(args.type==TYPE_NULL){
@@ -204,7 +204,7 @@ variable _lambda(variable args){
 	return R;
 }
 
-variable _import(variable args){
+variable _import(variable args,struct symbolstack* st){
 	variable A;
 	FILE* fp;
 	if(args.type==TYPE_NULL){
@@ -231,20 +231,20 @@ variable _import(variable args){
 
 void initifunc(){
 	variable f;
-	f=newifunc(TYPE_NUM,_plus);set("+",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,_minus);set("-",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,_multi);set("*",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,_divs);set("/",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,quit);set("quit",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,atom);set("atom",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,eq);set("eq",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,car);set("car",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,cdr);set("cdr",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,_cons);set("cons",f,symbols);delvariable(f);
-	f=newifunc(TYPE_NUM,_import);set("import",f,symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_plus);set("+",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_minus);set("-",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_multi);set("*",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_divs);set("/",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,quit);set("quit",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,atom);set("atom",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,eq);set("eq",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,car);set("car",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,cdr);set("cdr",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_cons);set("cons",f,symbols.symbols);delvariable(f);
+	f=newifunc(TYPE_NUM,_import);set("import",f,symbols.symbols);delvariable(f);
 
-	f=newspform(TYPE_NUM,quote);set("quote",f,symbols);delvariable(f);
-	f=newspform(TYPE_NUM,define);set("define",f,symbols);delvariable(f);
-	f=newspform(TYPE_NUM,_if);set("if",f,symbols);delvariable(f);
-	f=newspform(TYPE_NUM,_lambda);set("lambda",f,symbols);delvariable(f);
+	f=newspform(TYPE_NUM,quote);set("quote",f,symbols.symbols);delvariable(f);
+	f=newspform(TYPE_NUM,define);set("define",f,symbols.symbols);delvariable(f);
+	f=newspform(TYPE_NUM,_if);set("if",f,symbols.symbols);delvariable(f);
+	f=newspform(TYPE_NUM,_lambda);set("lambda",f,symbols.symbols);delvariable(f);
 }
