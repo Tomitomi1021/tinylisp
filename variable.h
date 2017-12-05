@@ -30,9 +30,21 @@ typedef struct{
 	char* str;
 } string;
 
+
+struct symboltable{
+	char exist;
+	char symbol[SYMBOLSIZE];
+	variable var;
+};
+
+struct symbolstack{
+	struct symboltable symbols[SYMBOLTABLESIZE];
+	struct symbolstack *prev;
+};
+
 typedef struct{
 	int type;
-	variable (*func)(variable);
+	variable (*func)(variable,struct symbolstack*);
 } ifunc;
 
 typedef struct{
@@ -41,14 +53,7 @@ typedef struct{
 	variable body;
 } lambda;
 
-struct symboltable{
-	char exist;
-	char symbol[SYMBOLSIZE];
-	variable var;
-};
-
-extern struct symboltable symbols[SYMBOLTABLESIZE];
-extern struct symboltable runtimesymbols[SYMBOLTABLESIZE];
+extern struct symbolstack symbols;
 
 cons* mkcons();
 
@@ -56,8 +61,8 @@ variable newvariable(int type,int option);
 variable newcons(variable car,variable cdr);
 //variable newsym(char* name);
 variable newnum(double i);
-variable newifunc(int type,variable (*func)(variable));
-variable newspform(int type,variable (*func)(variable));
+variable newifunc(int type,variable (*func)(variable,struct symbolstack*));
+variable newspform(int type,variable (*func)(variable,struct symbolstack*));
 variable copyvariable(variable v);
 int eqvariable(variable A,variable B);
 void delvariable(variable v);
@@ -67,12 +72,23 @@ variable read(char* str);
 
 void print(variable var,FILE* fp);
 
-variable eval(variable c);
+variable eval(variable c,struct symbolstack* st);
 
+void symbolstackdump(struct symbolstack* st,FILE* fp);
+struct symbolstack* newsymbolstack(struct symbolstack* prev);
+void delsymbolstack(struct symbolstack* st);
+
+void sset(char* symbol,variable v,struct symbolstack* st);
+variable sget(char* symbol,struct symbolstack* st);
+
+void symboldump(struct symboltable* symbols,FILE* fp);
 void set(char* symbol,variable v,struct symboltable* table);
 variable get(char* symbol,struct symboltable* table);
+int symbolexist(char* symbol,struct symboltable *table);
 void allclear(struct symboltable* table);
 void initsymboltable();
 void initifunc();
+
+int repl(FILE* fpin,FILE* fpout);
 #define _VARIABLE_H 1
 #endif

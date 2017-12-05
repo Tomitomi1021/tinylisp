@@ -16,9 +16,11 @@ int repl(FILE* fpin,FILE* fpout){
 	variable v,v2;
 	int brace=0;
 
+	if(!fpin)ERROR("入力がありません");
+
 	str=mkchar(0);
 
-	fprintf(fpout,">>");
+	if(fpout)fprintf(fpout,">>");
 	while(1){
 		c=fgetc(fpin);
 		if(feof(fpin)){
@@ -39,10 +41,10 @@ int repl(FILE* fpin,FILE* fpout){
 				delcharlist(str);
 				str=mkchar(0);
 				v=read(s);
-				v2=eval(v);
-				print(v2,fpout);
-				fputc('\n',fpout);
-				fprintf(fpout,">>");
+				v2=eval(v,&symbols);
+				if(fpout)print(v2,fpout);
+				if(fpout)fputc('\n',fpout);
+				if(fpout)fprintf(fpout,">>");
 				delvariable(v);
 				delvariable(v2);
 				free(s);
@@ -89,6 +91,8 @@ void strtest(){
 
 
 int main(){
+	FILE* fp;
+
 	initsymboltable();
 	initifunc();
 	printf("Welcome to TINY LISP\n");
