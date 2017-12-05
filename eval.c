@@ -10,13 +10,29 @@ void openargs(struct symbolstack* st,variable sym,variable args){
 	if(sym.type==TYPE_CONS){
 		if(args.type==TYPE_CONS){
 			if(((cons*)sym.var)->car.type == TYPE_SYM){
-				sset( ((cons*)sym.var)->car.var , ((cons*)(args.var))->car , st);
-				openargs(st,((cons*)sym.var)->cdr,((cons*)(args.var))->cdr);
+				if(!strcmp( ((cons*)sym.var)->car.var,"&rest")){
+					if(((cons*)sym.var)->cdr.type==TYPE_CONS){
+						sset( ((cons*)(((cons*)sym.var)->cdr.var))->car.var,args,st);
+					}else{
+						ERROR("symにTYPE_CONSまたはTYPE_NULL以外のものが渡されました。");
+					}
+				}else{
+					sset( ((cons*)sym.var)->car.var , ((cons*)(args.var))->car , st);
+					openargs(st,((cons*)sym.var)->cdr,((cons*)(args.var))->cdr);
+				}
 			}else{
 				ERROR("symにTYPE_CONSまたはTYPE_NULL以外のものが渡されました。");
 			}
 		}else if(args.type==TYPE_NULL){
-			ERROR("引数が足りません");
+			if(!strcmp( ((cons*)sym.var)->car.var,"&rest")){
+				if(((cons*)sym.var)->cdr.type==TYPE_CONS){
+					sset( ((cons*)(((cons*)sym.var)->cdr.var))->car.var,args,st);
+				}else{
+					ERROR("symにTYPE_CONSまたはTYPE_NULL以外のものが渡されました。");
+				}
+			}else{
+				ERROR("引数が足りません");
+			}
 		}else{
 			ERROR("argsにTYPE_CONSまたはTYPE_NULL以外のものが渡されました。");
 		}
